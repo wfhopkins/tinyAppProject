@@ -2,23 +2,26 @@
   "name": "tinyapp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "express_server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wfhopkins/tinyapp.git"
+    "url": "git+https://github.com/wfhopkins/tinyAppProject.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "William Hopkins, will.hop@gmail.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/wfhopkins/tinyapp/issues"
+    "url": "https://github.com/wfhopkins/tinyAppProject/issues"
   },
-  "homepage": "https://github.com/wfhopkins/tinyapp#readme",
+  "homepage": "https://github.com/wfhopkins/tinyAppProject#readme",
   "dependencies": {
     "ejs": "^3.1.9",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
