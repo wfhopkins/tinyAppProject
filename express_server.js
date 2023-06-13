@@ -56,6 +56,12 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World<b></body></html>\n");
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect("http://localhost:8080/urls")
+});
+
 app.post("/urls", (req, res) => {
   console.log(req.body);
   const newID = generateRandomString();
