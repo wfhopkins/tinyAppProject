@@ -26,9 +26,9 @@ app.get("/", (req,res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const id = req.params.id;
-  id = longURL;
-  console.log("longURL:", longURL);
+  const shortURL = req.params.id;
+  let longURL = urlDatabase[shortURL]
+  console.log("urlDatabase", urlDatabase);
   res.redirect(longURL);
 })
 
@@ -43,6 +43,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  console.log("urlDatabase[req.params.id]: ", urlDatabase[req.params.id]);
   res.render("urls_show", templateVars);
 });
 
