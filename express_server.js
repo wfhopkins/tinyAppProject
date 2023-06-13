@@ -11,7 +11,6 @@ function generateRandomString() {
   }
   return newID;
 };
-console.log("rando string?", generateRandomString());
 
 app.set("view engine", "ejs");
 
@@ -25,6 +24,13 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req,res) => {
   res.send("Hello!");
 });
+
+app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  id = longURL;
+  console.log("longURL:", longURL);
+  res.redirect(longURL);
+})
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
@@ -51,8 +57,9 @@ app.get("/hello", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);
-  urlDatabase[generateRandomString()] = req.body.longURL;
-  res.send("Ok");
+  const newID = generateRandomString();
+  urlDatabase[newID] = req.body.longURL;
+  res.redirect(`http://localhost:8080/urls/${newID}`);
 });
 
 app.listen(PORT, () => {
