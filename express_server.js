@@ -36,6 +36,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+
 app.get("/urls", (req, res) => {
   const templateVars = {
     username: req.cookies["username"],
@@ -66,6 +67,15 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World<b></body></html>\n");
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.render("urls_register", templateVars)
 });
 
 app.post("/login", (req, res) => {
