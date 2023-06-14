@@ -47,10 +47,19 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+// example done with mentor Kenny
+// app.get("/fruits/:name", (req, res) => {
+//   const fruitColours = {
+//     apple: "red",
+//     orange: "orange",
+//     banana: "yellow"
+//   };
+//   res.send(`${req.params.name} has colour ${fruitColours[req.params.name]}`)
+// });
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World<b></body></html>\n");
@@ -59,14 +68,24 @@ app.get("/hello", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
-  res.redirect("http://localhost:8080/urls")
+  res.redirect("/urls")
+});
+
+app.post("/urls/:id/edit", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  res.redirect("/urls")
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
   const newID = generateRandomString();
-  urlDatabase[newID] = req.body.longURL;
-  res.redirect(`http://localhost:8080/urls/${newID}`);
+  let longURL = req.body.longURL;
+  if (!longURL.startsWith("http")) {
+    longURL = "http://" + longURL;
+  }
+  urlDatabase[newID] = longURL;
+  res.redirect(`/urls/${newID}`);
 });
 
 app.listen(PORT, () => {
