@@ -51,18 +51,16 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// example done with mentor Kenny
-// app.get("/fruits/:name", (req, res) => {
-//   const fruitColours = {
-//     apple: "red",
-//     orange: "orange",
-//     banana: "yellow"
-//   };
-//   res.send(`${req.params.name} has colour ${fruitColours[req.params.name]}`)
-// });
-
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World<b></body></html>\n");
+});
+
+app.post("/login", (req, res) => {
+  console.log("req.params" ,req.params)
+  console.log("req.body", req.body)
+  const username = req.body.username;
+  res.cookie("username", username);
+  res.redirect("/urls")
 });
 
 app.post("/urls/:id/delete", (req, res) => {
