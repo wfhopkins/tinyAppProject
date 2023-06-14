@@ -4,6 +4,8 @@ const app = express();
 const PORT = 8080;
 
 function generateRandomString() {
+  // method to create a random alphanum from lowercase + nums from index 2 - <5
+  // const id = Math.random().toSrting(36).substring(2, 5);
   let newID = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charsLength = characters.length;
@@ -16,12 +18,12 @@ function generateRandomString() {
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
+app.use(express.urlencoded({ extended: true }));
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req,res) => {
   res.send("Hello!");
@@ -79,7 +81,6 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  // const username = req.body.username;
   res.clearCookie("username");
   res.redirect("/urls");
 });
