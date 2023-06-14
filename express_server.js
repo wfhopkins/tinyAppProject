@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080;
 
@@ -12,6 +13,7 @@ function generateRandomString() {
   return newID;
 };
 
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -30,13 +32,14 @@ app.get("/u/:id", (req, res) => {
   let longURL = urlDatabase[shortURL]
   console.log("urlDatabase", urlDatabase);
   res.redirect(longURL);
-})
+});
 
 app.get("/urls", (req, res) => {
   const templateVars = { 
     username: req.cookies["username"],  
     urls: urlDatabase 
   };
+  console.log("templateVars:", templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -63,8 +66,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log("req.params" ,req.params)
-  console.log("req.body", req.body)
   const username = req.body.username;
   res.cookie("username", username);
   res.redirect("/urls")
