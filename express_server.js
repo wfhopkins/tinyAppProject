@@ -77,6 +77,7 @@ app.get("/urls/new", (req, res) => {
   const user = users[userID];
   const templateVars = {
     user,
+    // user: user,
     urls: urlDatabase
   };
   res.render("urls_new", templateVars);
@@ -123,16 +124,12 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (email === "" || password === "") {
-    res.status(400);
-    res.send("Please include an Email and Password.");
-    return;
+    return res.send("Please include an Email and Password.").status(400);
   }
   
   const emailFound = getUserByEmail(email); //function code at top of page
   if (emailFound) {
-    res.status(400);
-    res.send("This email is already in use");
-    return;
+    return res.send("This email is already in use").status(400);
   }
   const userID = Math.random().toString(36).substring(2, 8);
   const newUser = {
