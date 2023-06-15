@@ -5,20 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Bootstrap CSS -->
-    <link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
-    crossorigin="anonymous"
-  />  
-  <title>Register Here!</title>
+  <link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+  integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+  crossorigin="anonymous"
+  />
+  
+  <title>Login</title>
 </head>
 <body>
-  <%- include("partials/_header")%>
 
+  <%- include("partials/_header")%>
   <main style="margin: 1em;">
-    <h3>Create Account</h3>
-    <form method="POST" action="/register">
+    <h3>Login</h3>
+    <form method="POST" action="login">
+
       <label for="email">Email</label>
       <br/>
       <input type="email" name="email" placeholder="Enter Email">
@@ -28,7 +30,7 @@
       <input type="password" name="password" placeholder="Password">
       <br/>
       <br/>
-      <button type="submit" class="btn btn-primary">Register</button>
+      <button class="btn btn-primary" type="submit">Login</button>
     </form>
   </main>
 </body>
