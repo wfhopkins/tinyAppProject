@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080;
 
+//Function used to generate unique 6 char userID
 function generateRandomString() {
   // method to create a random alphanum from lowercase + nums from index 2 - <5
   // const id = Math.random().toString(36).substring(2, 5);
@@ -14,11 +15,11 @@ function generateRandomString() {
   }
   return newID;
 }
-
+// Installed dependencies
 app.use(cookieParser());
 app.set("view engine", "ejs");
-
 app.use(express.urlencoded({ extended: true }));
+
 
 // Search users by email function 
 function getUserByEmail(email) {
@@ -30,11 +31,13 @@ function getUserByEmail(email) {
   return null;
 }
 
+// Databases for short + long URLS
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+// Database of registered users
 const users = {
   userID: {
     id: "userID",
@@ -48,6 +51,7 @@ const users = {
   },
 };
 
+// GET request for landing page
 app.get("/", (req,res) => {
   const userID = req.cookies["user_id"];
   if (userID) {
@@ -57,12 +61,14 @@ app.get("/", (req,res) => {
   }
 });
 
+// GET request for entering a shortURL in the search and redirecting to long
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   let longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
 
+// GET request for Create new URL page
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -73,6 +79,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// GET request for passing a short url and directing to the edit page
 app.get("/urls/:id", (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -84,26 +91,32 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
+// GET request for urls home page
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
   const templateVars = {
     user,
-    // user: user,
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
 });
 
+//GET request for the register page
 app.get("/register", (req, res) => {
+  const userID = req.cookies["user_id"];
+  if (userID) {
+    return res.redirect("/urls");
+  }
   const templateVars = {
     user: null,
   };
   res.render("urls_register", templateVars)
 });
 
+// POST request for the register page
 app.post("/register", (req, res) => {
+  
   const email = req.body.email;
   const password = req.body.password;
   if (email === "" || password === "") {
@@ -126,14 +139,14 @@ app.post("/register", (req, res) => {
 } 
   users[userID] = newUser;
   res.cookie("user_id", userID);
-  console.log("Users: ", users);
   res.redirect("/urls");
 });
 
+// GET request for Login
 app.get("/login", (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.cookies["user_id"];
   if (userID) {
-    return res.redirect("/urls")
+    return res.redirect("/urls");
   }
   const templateVars = {
     user: null
@@ -141,6 +154,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
+// POST request for Login
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -159,17 +173,20 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// POST request for deleting a url from the database
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect("/urls");
 });
 
+// POST request for Loging out and clearing cookie
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
 });
 
+// POST request for editing the long url assoicated with a short one
 app.post("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
   const longURL = req.body.longURL;
@@ -177,6 +194,7 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect("/urls");
 });
 
+// POST request to create and return a new key/valuie pair of short/longurl
 app.post("/urls", (req, res) => {
   const newID = generateRandomString();
   let longURL = req.body.longURL;
