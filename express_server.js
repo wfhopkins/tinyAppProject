@@ -64,6 +64,9 @@ app.get("/", (req,res) => {
 // GET request for entering a shortURL in the search and redirecting to long
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
+  if (!shortURL) {
+    return res.send("There is no URL with that id").status(404);
+  } 
   let longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
@@ -196,12 +199,17 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // POST request to create and return a new key/valuie pair of short/longurl
 app.post("/urls", (req, res) => {
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    return res.send("You must be logged in to shorten URLs").status(403);
+  }
   const newID = generateRandomString();
   let longURL = req.body.longURL;
   if (!longURL.startsWith("http")) {
     longURL = "http://" + longURL;
   }
   urlDatabase[newID] = longURL;
+  console.log("urlDatabase", urlDatabase);
   res.redirect(`/urls/${newID}`);
 });
 
