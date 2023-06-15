@@ -71,6 +71,9 @@ app.get("/u/:id", (req, res) => {
 // GET request for Create new URL page
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies["user_id"];
+  if (!userID) {
+    return res.redirect("/login");
+  }
   const user = users[userID];
   const templateVars = {
     user,
@@ -102,7 +105,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//GET request for the register page
+//GET request for Register
 app.get("/register", (req, res) => {
   const userID = req.cookies["user_id"];
   if (userID) {
@@ -114,7 +117,7 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars)
 });
 
-// POST request for the register page
+// POST request for Register
 app.post("/register", (req, res) => {
   
   const email = req.body.email;
