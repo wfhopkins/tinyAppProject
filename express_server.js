@@ -1,5 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
+const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080;
 
@@ -15,10 +17,18 @@ function generateRandomString() {
   }
   return newID;
 }
-// Installed dependencies
-app.use(cookieParser());
+// Configuration
 app.set("view engine", "ejs");
+
+// Installed middleware
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieSession({
+  name: "session",
+  keys: ["chicken"],
+  //Cookie options
+  maxAge: 24 * 60 * 60 * 1000 // 24hrs
+}));
 
 
 // Search users by email function 
@@ -33,8 +43,14 @@ function getUserByEmail(email) {
 
 // Databases for short + long URLS
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "user_id",
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "user_id",
+  },
 };
 
 // Database of registered users
@@ -64,10 +80,10 @@ app.get("/", (req,res) => {
 // GET request for entering a shortURL in the search and redirecting to long
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  if (!shortURL) {
+  let longURL = urlDatabase[shortURL].longURL
+  if (!longURL) {
     return res.send("There is no URL with that id").status(404);
   } 
-  let longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
 
@@ -93,7 +109,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     user,
     id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[userID].longURL,
   };
   res.render("urls_show", templateVars);
 });
@@ -135,10 +151,13 @@ app.post("/register", (req, res) => {
     return res.send("This email is already in use").status(400);
   }
   const userID = Math.random().toString(36).substring(2, 8);
+  // Added Salt and Hashing for PW
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(password, salt)
   const newUser = {
     id: userID,
     email: email,
-    password: password
+    password: hashedPassword
 } 
   users[userID] = newUser;
   res.cookie("user_id", userID);
@@ -169,10 +188,16 @@ app.post("/login", (req, res) => {
     return res.send("No user with that email").status(403);
   }
 
-  if (userFound.password !== password) {
-    return res.send("Incorrect username or password").status(403);
+  if (!bcrypt.compareSync(password, userFound.password)) {
+    return res.send("Passwords do not match").status(400);
   }
-  res.cookie("user_id", userFound.id);
+
+  // if (userFound.password !== password) {
+  //   return res.send("Incorrect username or password").status(403);
+  // }
+
+  // res.cookie("user_id", userFound.id);
+  req.session.user_id = userFound.id;
   res.redirect("/urls");
 });
 
@@ -186,13 +211,14 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST request for Loging out and clearing cookie
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
+  // req.session = null;
   res.redirect("/login");
 });
 
 // POST request for editing the long url assoicated with a short one
 app.post("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = req.body.longURL;
+  const longURL = urlDatabase[id].longURL;
   urlDatabase[shortURL] = longURL;
   res.redirect("/urls");
 });
@@ -208,7 +234,7 @@ app.post("/urls", (req, res) => {
   if (!longURL.startsWith("http")) {
     longURL = "http://" + longURL;
   }
-  urlDatabase[newID] = longURL;
+  urlDatabase[newID].longURL = longURL;
   console.log("urlDatabase", urlDatabase);
   res.redirect(`/urls/${newID}`);
 });
