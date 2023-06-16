@@ -161,7 +161,7 @@ app.post("/register", (req, res) => {
   const userID = Math.random().toString(36).substring(2, 8);
   const email = req.body.email;
   const password = req.body.password;
-  const emailFound = getUserByEmail(email, users);
+  const emailFound = getUserByEmail();
   const hashedPassword = bcrypt.hashSync(password, 10)
 
   // no email or password
@@ -199,7 +199,7 @@ app.get("/login", (req, res) => {
 // LOGIN POST
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const userFound = getUserByEmail(email, users);
+  const userFound = getUserByEmail();
   const password = req.body.password;
   
   if (!email || !password) {
