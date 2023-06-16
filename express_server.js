@@ -41,6 +41,17 @@ function getUserByEmail(email) {
   return null;
 }
 
+//return the urls associated with a user id
+function urlsForUser(id) {
+  const userURLs = {};
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      userURLs[url] = urlDatabase[url];
+    }
+  }
+  return userURLs;
+}
+
 // Databases for short + long URLS
 const urlDatabase = {
   "b2xVn2": {
@@ -97,7 +108,6 @@ app.get("/urls/new", (req, res) => {
   const user = users[userID];
   const templateVars = {
     user,
-    // user: user,
     urls: urlDatabase
   };
   res.render("urls_new", templateVars);
@@ -106,8 +116,23 @@ app.get("/urls/new", (req, res) => {
 // GET request for passing a short url and directing to the edit page
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id
+  if (!userID) {
+    res.send("You must be logged in to access URLs").status(403);
+    return;
+  }
+
   const shortURL = req.params.id
   const user = users[userID];
+
+  if (!urlDatabase[shortURL]) {
+    res.send("URL does not exist");
+    return;
+  }
+  // can be done with urlsForUser()
+  if (urlDatabase[shortURL].userID !== userID) {
+    res.send("You do not own this URL");
+    return;
+  }
 
   const templateVars = {
     user,
@@ -120,15 +145,17 @@ app.get("/urls/:id", (req, res) => {
 // GET request for urls home page
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id
+  const user = users[userID];
   if (!userID) {
     return res.send("You must Login or Register to view URLs").status(403);
+  } else {
+    const userUrls = urlsForUser(userID);
+    const templateVars = {
+      user,
+      urls: userUrls,
+    };
+    res.render("urls_index", templateVars);
   }
-  const user = users[userID];
-  const templateVars = {
-    user,
-    urls: urlDatabase
-  };
-  res.render("urls_index", templateVars);
 });
 
 //GET request for Register
@@ -156,32 +183,29 @@ app.post("/register", (req, res) => {
     return res.send("Please include an Email and Password.").status(400);
   }
   
+  // email in use
   if (emailFound) {
     return res.send("This email is already in use").status(400);
   }
 
+  // set session cookie
   users[userID] = {
     id: userID,
     email: email, 
     password: hashedPassword
   }
-
-
   req.session.user_id = userID;
   res.redirect("/urls");
 });
 
 // GET request for Login
 app.get("/login", (req, res) => {
-  // const userID = req.session.user_id
-  // if (userID) {
-  //   return res.redirect("/urls");
-  // }
-  // const templateVars = {
-  //   user: null
-  // }
+  const userID = req.session.user_id
+  if (userID) {
+    return res.redirect("/urls");
+  }
   const templateVars = {
-    user: users[req.session.user_id]
+    user: null
   }
   res.render("urls_login", templateVars);
 });
@@ -216,8 +240,22 @@ app.post("/login", (req, res) => {
 
 // POST request for deleting a url from the database
 app.post("/urls/:id/delete", (req, res) => {
-  const id = req.params.id;
-  delete urlDatabase[id];
+  const userID = req.session.user_id
+  if (!userID) {
+    res.send("You must be logged in to access URLs").status(403);
+    return;
+  }
+  const shortURL = req.params.id;
+  if (!urlDatabase[shortURL]) {
+    res.send("The URL does not exist").status(403);
+    return;
+  }
+  const myUrls = urlsForUser(userID)
+  if (myUrls[shortURL].userID !== userID) {
+    res.send("This URL does not belong to you").status(403);
+    return;
+  }
+  delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
@@ -229,7 +267,17 @@ app.post("/logout", (req, res) => {
 
 // POST request for editing the long url assoicated with a short one
 app.post("/urls/:id/edit", (req, res) => {
+  const userID = req.session.user_id
+  if (!userID) {
+    res.send("You must be logged in to access URLs").status(403);
+    return;
+  }
   const shortURL = req.params.id;
+  const myUrls = urlsForUser(userID)
+  if (myUrls[shortURL].userID !== userID) {
+    res.send("This URL does not belong to you").status(403);
+    return;
+  }
   urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
 });
