@@ -24,7 +24,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: "session",
-  keys: ["chicken"],
+  keys: ["ragingCorgi"],
   //Cookie options
   maxAge: 24 * 60 * 60 * 1000 // 24hrs
 }));
@@ -58,12 +58,12 @@ const users = {
   userID: {
     id: "userID",
     email: "a@a.com",
-    password: "1234",
+    password: bcrypt.hashSync("1234", 10),
   },
   user2ID: {
     id: "user2ID",
     email: "b@b.com",
-    password: "5678",
+    password: bcrypt.hashSync("5678", 10),
   },
 };
 
@@ -188,7 +188,7 @@ app.get("/login", (req, res) => {
 // LOGIN POST
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const userFound = getUserByEmail();
+  const userFound = getUserByEmail(email, users);
   const password = req.body.password;
   
   if (!email || !password) {

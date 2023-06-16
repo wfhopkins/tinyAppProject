@@ -12,13 +12,8 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 
 ## Dev Notes
-Expecting Rejection:
-The current version of the app has an issue with the registraion. Users are unable to log back in after logging out.
-It had been working for most of the day but was a functionality i hadn't thought to test with each change. I am unsure when
-I removed the functioanlity and will need help finding the issue. It appears that the user is not being stored in the user database upon registering.
+Project is fully functional after resolving an error with users password storage preventing registered users from logging back in.
 
-I am submitting the project as is because I would rather have it rejected and be able to fix it with feedback than to continue trying
-to solve this by myself.
 
 ## Dependencies
 
