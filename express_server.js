@@ -127,9 +127,8 @@ app.get("/urls/:id", (req, res) => {
     res.send("URL does not exist");
     return;
   }
-  // can be done with urlsForUser()
   const userUrls = urlsForUser(userID)
-  if (urlDatabase[shortURL].userID !== userID) {
+  if (userUrls !== userID) {
     res.send("You do not own this URL");
     return;
   }
