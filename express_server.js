@@ -267,6 +267,3 @@ app.post("/urls", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-//You should not be submitting TinyApp unfinished! Finishing the project and taking away its learnings is, at the end of the day, most important. Submitting a partially complete project will only lead to further complications later, as it will be rejected.
