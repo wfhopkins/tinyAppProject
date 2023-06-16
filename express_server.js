@@ -113,13 +113,13 @@ app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id
   const user = users[userID];
 
-  if (!urlDatabase[shortURL]) {
-    return res.send("URL does not exist").status(404);
-  }
-  const userUrls = urlsForUser(userID)
-  if (userUrls !== userID) {
-    return res.send("You do not own this URL").status(403);
-  }
+  // if (!urlDatabase[shortURL]) {
+  //   return res.send("URL does not exist").status(404);
+  // }
+  // const userUrls = urlsForUser(userID)
+  // if (userUrls !== userID) {
+  //   return res.send("You do not own this URL").status(403);
+  // }
   const templateVars = {
     user,
     id: shortURL,
@@ -161,7 +161,7 @@ app.post("/register", (req, res) => {
   const userID = Math.random().toString(36).substring(2, 8);
   const email = req.body.email;
   const password = req.body.password;
-  const emailFound = getUserByEmail(email, users); //function code at top of page
+  const emailFound = getUserByEmail(email, users);
   const hashedPassword = bcrypt.hashSync(password, 10)
 
   // no email or password
@@ -196,22 +196,20 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
-
-
 // LOGIN POST
 app.post("/login", (req, res) => {
-  const loginUser = users[userFound]
   const email = req.body.email;
-  const userFound = getUserByEmail(email, users)
+  const userFound = getUserByEmail(email, users);
   const password = req.body.password;
   
   if (!email || !password) {
-   return res.send("Please include an Email and Password.").status(400);
+    return res.send("Please include an Email and Password.").status(400);
   }
+  const loginUser = users[userFound];
   if (loginUser) {
     if (bcrypt.compareSync(password, loginUser.password)) {
-      req.session.user_id = loginUser.id
-      return res.redirect('/urls')
+      req.session.user_id = loginUser.id;
+      return res.redirect('/urls');
     } else {
      return res.send("Passwords do not match").status(400);
     }
@@ -230,7 +228,7 @@ app.post("/urls/:id/delete", (req, res) => {
   if (!urlDatabase[shortURL]) {
     return res.send("The URL does not exist").status(403);
   }
-  const myUrls = urlsForUser(userID)
+  const myUrls = urlsForUser(userID);
   if (myUrls[shortURL].userID !== userID) {
     return res.send("This URL does not belong to you").status(403);
   }
@@ -246,14 +244,16 @@ app.post("/logout", (req, res) => {
 
 // URLs/:ID/EDIT POST
 app.post("/urls/:id/edit", (req, res) => {
-  const userID = req.session.user_id
+  const userID = req.session.user_id;
   if (!userID) {
-    return res.send("You must be logged in to access URLs").status(403);
+    res.send("You must be logged in to access URLs").status(403);
+    return;
   }
   const shortURL = req.params.id;
-  const myUrls = urlsForUser(userID)
+  const myUrls = urlsForUser(userID);
   if (myUrls[shortURL].userID !== userID) {
-    return res.send("This URL does not belong to you").status(403);
+    res.send("This URL does not belong to you").status(403);
+    return;
   }
   urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
@@ -261,7 +261,7 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // URLs POST
 app.post("/urls", (req, res) => {
-  const userID = req.session.user_id
+  const userID = req.session.user_id;
   if (!userID) {
     return res.send("You must be logged in to shorten URLs").status(403);
   }
