@@ -1,7 +1,8 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
+const bcrypt = require("bcryptjs");
+const getUserByEmail = require("./helpers")
 const app = express();
 const PORT = 8080;
 
@@ -30,16 +31,6 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24hrs
 }));
 
-
-// Search users by email function 
-function getUserByEmail(email) {
-  for (const userID in users) {
-    if(users[userID].email === email) {
-      return userID;
-    }
-  }
-  return null;
-}
 
 //return the urls associated with a user id
 function urlsForUser(userID) {
@@ -170,7 +161,7 @@ app.post("/register", (req, res) => {
   const userID = Math.random().toString(36).substring(2, 8);
   const email = req.body.email;
   const password = req.body.password;
-  const emailFound = getUserByEmail(email); //function code at top of page
+  const emailFound = getUserByEmail(email, users); //function code at top of page
   const hashedPassword = bcrypt.hashSync(password, 10)
 
   // no email or password
@@ -209,9 +200,9 @@ app.get("/login", (req, res) => {
 
 // LOGIN POST
 app.post("/login", (req, res) => {
-  const userFound = getUserByEmail(req.body.email)
   const loginUser = users[userFound]
   const email = req.body.email;
+  const userFound = getUserByEmail(email, users)
   const password = req.body.password;
   
   if (!email || !password) {
