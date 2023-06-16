@@ -116,21 +116,18 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
-    res.send("You must be logged in to access URLs").status(403);
-    return;
-  }
+    return res.send("You must be logged in to access URLs").status(403);
+    }
 
   const shortURL = req.params.id
   const user = users[userID];
 
   if (!urlDatabase[shortURL]) {
-    res.send("URL does not exist");
-    return;
+    return res.send("URL does not exist").status(404);
   }
   const userUrls = urlsForUser(userID)
   if (userUrls !== userID) {
-    res.send("You do not own this URL");
-    return;
+    return res.send("You do not own this URL").status(403);
   }
   const templateVars = {
     user,
@@ -218,20 +215,17 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   
   if (!email || !password) {
-    res.send("Please include an Email and Password.").status(400); 
-    return
+   return res.send("Please include an Email and Password.").status(400);
   }
   if (loginUser) {
     if (bcrypt.compareSync(password, loginUser.password)) {
       req.session.user_id = loginUser.id
       return res.redirect('/urls')
     } else {
-      res.send("Passwords do not match").status(400);
-      return;
+     return res.send("Passwords do not match").status(400);
     }
   } else {
-    res.send("No user with that email").status(403);
-     return
+    return res.send("No user with that email").status(403);
     }
   });
 
@@ -239,18 +233,15 @@ app.post("/login", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
-    res.send("You must be logged in to access URLs").status(403);
-    return;
+    return res.send("You must be logged in to access URLs").status(403);
   }
   const shortURL = req.params.id;
   if (!urlDatabase[shortURL]) {
-    res.send("The URL does not exist").status(403);
-    return;
+    return res.send("The URL does not exist").status(403);
   }
   const myUrls = urlsForUser(userID)
   if (myUrls[shortURL].userID !== userID) {
-    res.send("This URL does not belong to you").status(403);
-    return;
+    return res.send("This URL does not belong to you").status(403);
   }
   delete urlDatabase[shortURL];
   res.redirect("/urls");
@@ -266,14 +257,12 @@ app.post("/logout", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
-    res.send("You must be logged in to access URLs").status(403);
-    return;
+    return res.send("You must be logged in to access URLs").status(403);
   }
   const shortURL = req.params.id;
   const myUrls = urlsForUser(userID)
   if (myUrls[shortURL].userID !== userID) {
-    res.send("This URL does not belong to you").status(403);
-    return;
+    return res.send("This URL does not belong to you").status(403);
   }
   urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
