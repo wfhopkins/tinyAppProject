@@ -42,17 +42,17 @@ function getUserByEmail(email) {
 }
 
 //return the urls associated with a user id
-function urlsForUser(id) {
+function urlsForUser(userID) {
   const userURLs = {};
   for (const url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
+    if (urlDatabase[url].userID === userID) {
       userURLs[url] = urlDatabase[url];
     }
   }
   return userURLs;
 }
 
-// Databases for short + long URLS
+// DATABASE FOR URLs
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -64,7 +64,7 @@ const urlDatabase = {
   },
 };
 
-// Database of registered users
+// REGISTERED USERS
 const users = {
   userID: {
     id: "userID",
@@ -78,10 +78,9 @@ const users = {
   },
 };
 
-// GET request for landing page
+// LANDING PAGE GET
 app.get("/", (req,res) => {
   const userID = req.session.user_id
-  
   if (userID) {
     res.redirect("/urls");
   } else {
@@ -89,7 +88,7 @@ app.get("/", (req,res) => {
   }
 });
 
-// GET request for entering a shortURL in the search and redirecting to long
+// U/:ID GET
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   let longURL = urlDatabase[shortURL].longURL
@@ -99,7 +98,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-// GET request for Create new URL page
+// URLs/NEW GET
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
@@ -113,7 +112,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// GET request for passing a short url and directing to the edit page
+// URLs/:ID GET
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
@@ -129,20 +128,20 @@ app.get("/urls/:id", (req, res) => {
     return;
   }
   // can be done with urlsForUser()
+  const userUrls = urlsForUser(userID)
   if (urlDatabase[shortURL].userID !== userID) {
     res.send("You do not own this URL");
     return;
   }
-
   const templateVars = {
     user,
-    id: req.params.id,
+    id: shortURL,
     longURL: urlDatabase[shortURL].longURL,
   };
   res.render("urls_show", templateVars);
 });
 
-// GET request for urls home page
+// URLs GET
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id
   const user = users[userID];
@@ -158,7 +157,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
-//GET request for Register
+// REGISTER GET
 app.get("/register", (req, res) => {
   const userID= req.session.user_id
   if (userID) {
@@ -170,7 +169,7 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars)
 });
 
-// POST request for Register
+// REGISTER POST
 app.post("/register", (req, res) => {
   const userID = Math.random().toString(36).substring(2, 8);
   const email = req.body.email;
@@ -198,7 +197,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-// GET request for Login
+// LOGIN GET
 app.get("/login", (req, res) => {
   const userID = req.session.user_id
   if (userID) {
@@ -212,13 +211,13 @@ app.get("/login", (req, res) => {
 
 
 
-// POST request for Login
+// LOGIN POST
 app.post("/login", (req, res) => {
   const userFound = getUserByEmail(req.body.email)
   const loginUser = users[userFound]
   const email = req.body.email;
   const password = req.body.password;
-
+  
   if (!email || !password) {
     res.send("Please include an Email and Password.").status(400); 
     return
@@ -226,8 +225,7 @@ app.post("/login", (req, res) => {
   if (loginUser) {
     if (bcrypt.compareSync(password, loginUser.password)) {
       req.session.user_id = loginUser.id
-      res.redirect('/urls')
-      return
+      return res.redirect('/urls')
     } else {
       res.send("Passwords do not match").status(400);
       return;
@@ -235,10 +233,10 @@ app.post("/login", (req, res) => {
   } else {
     res.send("No user with that email").status(403);
      return
-  }
-});
+    }
+  });
 
-// POST request for deleting a url from the database
+// URLs/:ID/DELETE POST
 app.post("/urls/:id/delete", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
@@ -259,13 +257,13 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-// POST request for Loging out and clearing cookie
+// LOGOUT POST
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");
 });
 
-// POST request for editing the long url assoicated with a short one
+// URLs/:ID/EDIT POST
 app.post("/urls/:id/edit", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
@@ -282,7 +280,7 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect("/urls");
 });
 
-// POST request to create and return a new key/valuie pair of short/longurl
+// URLs POST
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
