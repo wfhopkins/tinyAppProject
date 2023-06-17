@@ -1,3 +1,4 @@
+// Imports and Dependencies
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
@@ -34,11 +35,15 @@ app.get("/", (req,res) => {
 // U/:ID GET
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  let longURL = urlDatabase[shortURL].longURL;
-  if (!longURL) {
-    return res.send("There is no URL with that id").status(404);
+  const userID = req.session.user_id;
+  if (!urlDatabase[shortURL]) {
+    return res.send("The URL does not exist").status(404);
   }
-  res.redirect(longURL);
+  const myUrls = urlsForUser(userID);
+  if (!myUrls[shortURL]) {
+    return res.send("This URL does not belong to you").status(403);
+  }
+  res.redirect(urlDatabase[shortURL].longURL);
 });
 
 // URLs/NEW GET
@@ -62,6 +67,9 @@ app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   if (!userID) {
     return res.send("You must be logged in to access URLs").status(403);
+  }
+  if (!urlDatabase[shortURL]) {
+    return res.send("The URL does not exist").status(403);
   }
   const myUrls = urlsForUser(userID);
   if (!myUrls[shortURL]) {
@@ -180,6 +188,7 @@ app.post("/urls/:id/delete", (req, res) => {
   if (myUrls[shortURL].userID !== userID) {
     return res.send("This URL does not belong to you").status(403);
   }
+  console.log("urlDatabase", urlDatabase);
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
