@@ -150,7 +150,7 @@ app.post("/register", (req, res) => {
   const userID = Math.random().toString(36).substring(2, 8);
   const email = req.body.email;
   const password = req.body.password;
-  const emailFound = getUserByEmail();
+  const emailFound = getUserByEmail(email, users);
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   // no email or password
@@ -160,7 +160,7 @@ app.post("/register", (req, res) => {
   
   // email in use
   if (emailFound) {
-    return res.send("This email is already in use").status(400);
+    return res.send("This Email is unavailable").status(400);
   }
 
   // set session cookie
@@ -200,10 +200,10 @@ app.post("/login", (req, res) => {
       req.session.user_id = loginUser.id;
       return res.redirect('/urls');
     } else {
-      return res.send("Passwords do not match").status(400);
+      return res.send("Incorrect Email or Password").status(400);
     }
   } else {
-    return res.send("No user with that email").status(403);
+    return res.send("Incorrect Email or Password").status(403);
   }
 });
 
@@ -231,8 +231,8 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-// URLs/:ID/EDIT POST
-app.post("/urls/:id/edit", (req, res) => {
+// URLs/:ID POST
+app.post("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
     return res.send("You must be logged in to access URLs").status(403);
