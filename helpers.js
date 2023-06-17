@@ -1,5 +1,8 @@
 // Functions for TinyApp
 //
+const { urlDatabase, users } = require("./database")
+
+
 // Search users by email function
 const getUserByEmail = function(email, users) {
   for (const userID in users) {
@@ -29,9 +32,11 @@ function urlsForUser(userID) {
       userURLs[url] = urlDatabase[url];
     }
   }
+  if (userURLs.length === 0) {
+    return false;
+  }
   return userURLs;
 }
-
 
 
 module.exports = { getUserByEmail, generateRandomString, urlsForUser };

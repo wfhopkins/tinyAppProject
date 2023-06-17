@@ -2,6 +2,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+const { urlDatabase, users } = require("./database");
 const {getUserByEmail, generateRandomString, urlsForUser} = require("./helpers");
 const app = express();
 const PORT = 8080;
@@ -19,33 +20,6 @@ app.use(cookieSession({
   //Cookie options
   maxAge: 24 * 60 * 60 * 1000 // 24hrs
 }));
-
-
-// DATABASE FOR URLs
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userID",
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "userID2",
-  },
-};
-
-// REGISTERED USERS
-const users = {
-  userID: {
-    id: "userID",
-    email: "a@a.com",
-    password: bcrypt.hashSync("1234", 10),
-  },
-  user2ID: {
-    id: "user2ID",
-    email: "b@b.com",
-    password: bcrypt.hashSync("5678", 10),
-  },
-};
 
 // LANDING PAGE GET
 app.get("/", (req,res) => {
@@ -70,6 +44,7 @@ app.get("/u/:id", (req, res) => {
 // URLs/NEW GET
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id;
+  
   if (!userID) {
     return res.redirect("/login");
   }
@@ -84,10 +59,14 @@ app.get("/urls/new", (req, res) => {
 // URLs/:ID GET
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
+  const shortURL = req.params.id;
   if (!userID) {
     return res.send("You must be logged in to access URLs").status(403);
   }
-  const shortURL = req.params.id;
+  const myUrls = urlsForUser(userID);
+  if (!myUrls[shortURL]) {
+    return res.send("This URL does not belong to you").status(403);
+  }
   const user = users[userID];
   const templateVars = {
     user,
