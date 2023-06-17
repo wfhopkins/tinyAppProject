@@ -30,4 +30,5 @@ Project is being worked on incrementally after submission rejection.
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
-- Run the development web server using the `npm start` command.
+- Run the development web server using the `npm start` command
+  while in project directory.
