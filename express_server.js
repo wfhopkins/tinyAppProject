@@ -2,20 +2,11 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
-const {getUserByEmail} = require("./helpers");
+const {getUserByEmail, generateRandomString, urlsForUser} = require("./helpers");
 const app = express();
 const PORT = 8080;
 
-//Function used to generate unique 6 char userID
-function generateRandomString() {
-  let newID = "";
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charsLength = characters.length;
-  for (let i = 0; i < 6; i++) {
-    newID += characters.charAt(Math.floor(Math.random() * charsLength));
-  }
-  return newID;
-}
+
 // Configuration
 app.set("view engine", "ejs");
 
@@ -29,17 +20,6 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24hrs
 }));
 
-
-//return the urls associated with a user id
-function urlsForUser(userID) {
-  const userURLs = {};
-  for (const url in urlDatabase) {
-    if (urlDatabase[url].userID === userID) {
-      userURLs[url] = urlDatabase[url];
-    }
-  }
-  return userURLs;
-}
 
 // DATABASE FOR URLs
 const urlDatabase = {
